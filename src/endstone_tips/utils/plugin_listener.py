@@ -12,7 +12,7 @@ class OnListener:
         if not theme.get("是否开启", False):
             return
         message = str_replace(theme.get("显示", "{name}: {msg}"), event.player).replace("{msg}", event.message)
-        event.cancelled = True
+        event.is_cancelled = True
         if theme.get("是否仅在世界内有效", False):
             for p in tips_instance.server.online_players:
                 if p.level.name == event.player.level.name:
