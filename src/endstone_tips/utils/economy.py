@@ -14,6 +14,10 @@ class EconomyProvider:
         """检查经济插件是否可用"""
         raise NotImplementedError
 
+    def get_name(self) -> str:
+        """返回提供者显示名称（用于日志）"""
+        raise NotImplementedError
+
 class JsonMoneyProvider(EconomyProvider):
     """ 兼容ye111566_jsonmoney """
     PLUGIN_NAME = "ye111566_jsonmoney"
@@ -25,9 +29,9 @@ class JsonMoneyProvider(EconomyProvider):
     def _get_plugin(self):
         """ 获取 JsonMoney 插件实例  """
         if self._plugin is None:
-            maneger = self.server.plugin_manager
-            plugin = maneger.get_plugin(self.PLUGIN_NAME)
-            if plugin is not None and maneger.is_plugin_enabled(plugin):
+            manager = self.server.plugin_manager
+            plugin = manager.get_plugin(self.PLUGIN_NAME)
+            if plugin is not None and manager.is_plugin_enabled(plugin):
                 self._plugin = plugin
         return self._plugin
 
@@ -39,6 +43,9 @@ class JsonMoneyProvider(EconomyProvider):
             self._plugin = None
             return False
         return True
+
+    def get_name(self) -> str:
+        return "JsonMoney (ye111566_jsonmoney)"
 
     def get_balance(self, player_name: str) -> Optional[float]:
         plugin = self._get_plugin()
@@ -78,6 +85,9 @@ class UMoneyProvider(EconomyProvider):
             self._plugin = None
             return False
         return True
+
+    def get_name(self) -> str:
+        return "UMoney"
 
     def get_balance(self, player_name: str) -> Optional[float]:
         """获取玩家余额"""
@@ -137,6 +147,16 @@ class GenericEconomyProvider(EconomyProvider):
             return False
         return True
 
+    def get_name(self) -> str:
+        # 名称取自运行时探测到的插件实例，源码中不硬编码任何插件名
+        plugin = self._get_plugin()
+        if plugin is None:
+            return "通用经济接口"
+        try:
+            return "通用经济接口 ({})".format(plugin.name)
+        except Exception:
+            return "通用经济接口"
+
     def get_balance(self, player_name: str) -> Optional[float]:
         """获取玩家余额"""
         plugin = self._get_plugin()
@@ -177,6 +197,13 @@ class EconomyManager:
                 return provider
 
         return None
+
+    def get_active_provider_name(self) -> Optional[str]:
+        """获取当前激活的经济提供者名称（用于日志）"""
+        provider = self.get_active_provider()
+        if provider is None:
+            return None
+        return provider.get_name()
 
     def is_available(self) -> bool:
         """检查是否有可用的经济插件"""

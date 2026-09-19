@@ -30,7 +30,7 @@ BROAD_CAST_TYPE = 5
 class Tips(Plugin):
 
     prefix = "Tips"
-    version = "0.1.3"
+    version = "0.1.4"
     api_version = "0.10"
 
     soft_depend = ["ye111566_jsonmoney", "umoney", "economyapi"]
@@ -99,8 +99,9 @@ class Tips(Plugin):
         
         # 初始化经济管理器 (软依赖)
         self.economy_manager = EconomyManager(self.server)
-        if self.economy_manager.is_available():
-            self.logger.info("已检测到经济插件，{money} 变量可用")
+        provider_name = self.economy_manager.get_active_provider_name()
+        if provider_name:
+            self.logger.info(f"已对接经济插件: {provider_name}，{{money}} 变量可用")
         else:
             self.logger.info("未检测到经济插件，{money} 变量将显示 N/A")
 
